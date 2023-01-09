@@ -169,19 +169,19 @@ public class Parser {
 
         for (var row : rows)
             for (var col : columns)
-                parseTable.put(new Pair<String, String>(row, col), new Pair<String, Integer>("err",-1));
+                parseTable.put(new Pair<String, String>(row, col), new Pair<String, Integer>("err", -1));
 
         for (var col : columns)
-            parseTable.put(new Pair<String, String>(col, col), new Pair<String, Integer>("pop",-1));
+            parseTable.put(new Pair<String, String>(col, col), new Pair<String, Integer>("pop", -1));
 
-        parseTable.put(new Pair<String, String>("$", "$"), new Pair<String, Integer>("acc",-1));
+        parseTable.put(new Pair<String, String>("$", "$"), new Pair<String, Integer>("acc", -1));
 
         var productions = grammar.getP();
         this.productionsRhs = new ArrayList<>();
-        productions.forEach((k,v) -> {
+        productions.forEach((k, v) -> {
             var nonterminal = k.iterator().next();
-            for(var prod : v)
-                if(!prod.get(0).equals("epsilon"))
+            for (var prod : v)
+                if (!prod.get(0).equals("epsilon"))
                     productionsRhs.add(prod);
                 else {
                     productionsRhs.add(new ArrayList<>(List.of("epsilon", nonterminal)));
@@ -197,10 +197,10 @@ public class Parser {
                 var firstSymbol = production.get(0);
                 if (grammar.getE().contains(firstSymbol))
                     if (parseTable.get(new Pair<>(key, firstSymbol)).getFirst().equals("err"))
-                        parseTable.put(new Pair<>(key, firstSymbol), new Pair<>(String.join(" ", production),productionsRhs.indexOf(production)+1));
+                        parseTable.put(new Pair<>(key, firstSymbol), new Pair<>(String.join(" ", production), productionsRhs.indexOf(production) + 1));
                     else {
                         try {
-                            throw new IllegalAccessException("CONFLICT: Pair "+key+","+firstSymbol);
+                            throw new IllegalAccessException("CONFLICT: Pair " + key + "," + firstSymbol);
                         } catch (IllegalAccessException e) {
                             e.printStackTrace();
                         }
@@ -209,10 +209,10 @@ public class Parser {
                     if (production.size() == 1)
                         for (var symbol : firstSet.get(firstSymbol))
                             if (parseTable.get(new Pair<>(key, symbol)).getFirst().equals("err"))
-                                parseTable.put(new Pair<>(key, symbol), new Pair<>(String.join(" ", production),productionsRhs.indexOf(production)+1));
+                                parseTable.put(new Pair<>(key, symbol), new Pair<>(String.join(" ", production), productionsRhs.indexOf(production) + 1));
                             else {
                                 try {
-                                    throw new IllegalAccessException("CONFLICT: Pair "+key+","+symbol);
+                                    throw new IllegalAccessException("CONFLICT: Pair " + key + "," + symbol);
                                 } catch (IllegalAccessException e) {
                                     e.printStackTrace();
                                 }
@@ -253,23 +253,21 @@ public class Parser {
                     for (var symbol : follow) {
                         if (symbol.equals("epsilon")) {
                             if (parseTable.get(new Pair<>(key, "$")).getFirst().equals("err")) {
-                                var prod = new ArrayList<>(List.of("epsilon",key));
+                                var prod = new ArrayList<>(List.of("epsilon", key));
                                 parseTable.put(new Pair<>(key, "$"), new Pair<>("epsilon", productionsRhs.indexOf(prod) + 1));
-                            }
-                            else {
+                            } else {
                                 try {
-                                    throw new IllegalAccessException("CONFLICT: Pair "+key+","+symbol);
+                                    throw new IllegalAccessException("CONFLICT: Pair " + key + "," + symbol);
                                 } catch (IllegalAccessException e) {
                                     e.printStackTrace();
                                 }
                             }
                         } else if (parseTable.get(new Pair<>(key, symbol)).getFirst().equals("err")) {
-                            var prod = new ArrayList<>(List.of("epsilon",key));
+                            var prod = new ArrayList<>(List.of("epsilon", key));
                             parseTable.put(new Pair<>(key, symbol), new Pair<>("epsilon", productionsRhs.indexOf(prod) + 1));
-                        }
-                        else {
+                        } else {
                             try {
-                                throw new IllegalAccessException("CONFLICT: Pair "+key+","+symbol);
+                                throw new IllegalAccessException("CONFLICT: Pair " + key + "," + symbol);
                             } catch (IllegalAccessException e) {
                                 e.printStackTrace();
                             }
@@ -306,42 +304,40 @@ public class Parser {
         return builder.toString();
     }
 
-    public List<Integer> parseSequence(List<String> sequence){
+    public List<Integer> parseSequence(List<String> sequence) {
         Stack<String> alpha = new Stack<>();
         Stack<String> beta = new Stack<>();
         List<Integer> result = new ArrayList<>();
 
         //initialization
         alpha.push("$");
-        for(var i=sequence.size()-1;i>=0;--i)
+        for (var i = sequence.size() - 1; i >= 0; --i)
             alpha.push(sequence.get(i));
 
         beta.push("$");
         beta.push(grammar.getS());
 
-        while(!(alpha.peek().equals("$") && beta.peek().equals("$"))){
+        while (!(alpha.peek().equals("$") && beta.peek().equals("$"))) {
             String alphaPeek = alpha.peek();
             String betaPeek = beta.peek();
-            Pair<String,String> key = new Pair<>(betaPeek,alphaPeek);
-            Pair<String,Integer> value = parseTable.get(key);
+            Pair<String, String> key = new Pair<>(betaPeek, alphaPeek);
+            Pair<String, Integer> value = parseTable.get(key);
 
-            if(!value.getFirst().equals("err")){
-                if(value.getFirst().equals("pop")){
+            if (!value.getFirst().equals("err")) {
+                if (value.getFirst().equals("pop")) {
                     alpha.pop();
                     beta.pop();
-                }
-                else {
+                } else {
                     beta.pop();
-                    if(!value.getFirst().equals("epsilon")) {
+                    if (!value.getFirst().equals("epsilon")) {
                         String[] val = value.getFirst().split(" ");
                         for (var i = val.length - 1; i >= 0; --i)
                             beta.push(val[i]);
                     }
                     result.add(value.getSecond());
                 }
-            }
-            else {
-                System.out.println("Syntax error for key "+key);
+            } else {
+                System.out.println("Syntax error for key " + key);
                 System.out.println("Current alpha and beta for sequence parsing:");
                 System.out.println(alpha);
                 System.out.println(beta);
@@ -353,9 +349,9 @@ public class Parser {
         return result;
     }
 
-    public List<String> getProductionByOrderNumber(int order){
-        var production = productionsRhs.get(order-1);
-        if(production.contains("epsilon"))
+    public List<String> getProductionByOrderNumber(int order) {
+        var production = productionsRhs.get(order - 1);
+        if (production.contains("epsilon"))
             return List.of("epsilon");
         return production;
     }

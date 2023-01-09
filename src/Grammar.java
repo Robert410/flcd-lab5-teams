@@ -13,26 +13,26 @@ public class Grammar {
     }
 
     private void readFromFile(String filename) {
-        try{
+        try {
             BufferedReader reader = new BufferedReader(new FileReader(filename));
 
             String input = reader.readLine();
-            String[] NlineSplit = input.split("=",input.indexOf("="));
+            String[] NlineSplit = input.split("=", input.indexOf("="));
             StringBuilder Nline = new StringBuilder();
-            for(int i=1;i<NlineSplit.length;++i)
+            for (int i = 1; i < NlineSplit.length; ++i)
                 Nline.append(NlineSplit[i]);
             StringBuilder builder = new StringBuilder(Nline.toString());
-            builder.deleteCharAt(1).deleteCharAt(Nline.length()-2);
+            builder.deleteCharAt(1).deleteCharAt(Nline.length() - 2);
             Nline = new StringBuilder(builder.toString());
             this.N = new HashSet<>(Arrays.asList(Nline.toString().strip().split(" ")));
 
             input = reader.readLine();
-            String[] ElineSplit = input.split("=",input.indexOf("="));
+            String[] ElineSplit = input.split("=", input.indexOf("="));
             StringBuilder Eline = new StringBuilder();
-            for(int i=1;i<ElineSplit.length;++i)
+            for (int i = 1; i < ElineSplit.length; ++i)
                 Eline.append(ElineSplit[i]);
             builder = new StringBuilder(Eline.toString());
-            builder.deleteCharAt(1).deleteCharAt(Eline.length()-2);
+            builder.deleteCharAt(1).deleteCharAt(Eline.length() - 2);
             Eline = new StringBuilder(builder.toString());
             this.E = new HashSet<>(Arrays.asList(Eline.toString().strip().split(" ")));
 
@@ -41,36 +41,36 @@ public class Grammar {
             // first and last lines for productions will not contain any relevant information, we only need to check starting from the second until the second-last
             reader.readLine();
             String line = reader.readLine();
-            while(line != null){
-                if(!line.equals("}")) {
+            while (line != null) {
+                if (!line.equals("}")) {
                     String[] tokens = line.split("->");
                     String[] lhsTokens = tokens[0].split(",");
                     String[] rhsTokens = tokens[1].split("\\|");
 
                     Set<String> lhs = new HashSet<>();
-                    for(String l : lhsTokens)
+                    for (String l : lhsTokens)
                         lhs.add(l.strip());
-                    if(!P.containsKey(lhs))
-                        P.put(lhs,new HashSet<>());
+                    if (!P.containsKey(lhs))
+                        P.put(lhs, new HashSet<>());
 
-                    for(String rhsT : rhsTokens) {
+                    for (String rhsT : rhsTokens) {
                         ArrayList<String> productionElements = new ArrayList<>();
                         String[] rhsTokenElement = rhsT.strip().split(" ");
-                        for(String r : rhsTokenElement)
+                        for (String r : rhsTokenElement)
                             productionElements.add(r.strip());
                         P.get(lhs).add(productionElements);
                     }
                 }
                 line = reader.readLine();
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public String printNonTerminals() {
         StringBuilder sb = new StringBuilder("N = { ");
-        for(String n : N)
+        for (String n : N)
             sb.append(n).append(" ");
         sb.append("}");
         return sb.toString();
@@ -78,7 +78,7 @@ public class Grammar {
 
     public String printTerminals() {
         StringBuilder sb = new StringBuilder("E = { ");
-        for(String e : E)
+        for (String e : E)
             sb.append(e).append(" ");
         sb.append("}");
         return sb.toString();
@@ -89,16 +89,16 @@ public class Grammar {
         P.forEach((lhs, rhs) -> {
             sb.append("\t");
             int count = 0;
-            for(String lh : lhs) {
+            for (String lh : lhs) {
                 sb.append(lh);
                 count++;
-                if(count<lhs.size())
+                if (count < lhs.size())
                     sb.append(", ");
             }
             sb.append(" -> ");
             count = 0;
-            for(List<String> rh : rhs){
-                for(String r : rh) {
+            for (List<String> rh : rhs) {
+                for (String r : rh) {
                     sb.append(r).append(" ");
                 }
                 count++;
@@ -112,16 +112,16 @@ public class Grammar {
         return sb.toString();
     }
 
-    public String printProductionsForNonTerminal(String nonTerminal){
+    public String printProductionsForNonTerminal(String nonTerminal) {
         StringBuilder sb = new StringBuilder();
 
-        for(Set<String> lhs : P.keySet()) {
-            if(lhs.contains(nonTerminal)) {
+        for (Set<String> lhs : P.keySet()) {
+            if (lhs.contains(nonTerminal)) {
                 sb.append(nonTerminal).append(" -> ");
                 Set<List<String>> rhs = P.get(lhs);
                 int count = 0;
                 for (List<String> rh : rhs) {
-                    for(String r : rh) {
+                    for (String r : rh) {
                         sb.append(r).append(" ");
                     }
                     count++;
@@ -134,27 +134,27 @@ public class Grammar {
         return sb.toString();
     }
 
-    public boolean checkIfCFG(){
+    public boolean checkIfCFG() {
         var checkStartingSymbol = false;
-        for(Set<String> lhs : P.keySet())
+        for (Set<String> lhs : P.keySet())
             if (lhs.contains(S)) {
                 checkStartingSymbol = true;
                 break;
             }
-        if(!checkStartingSymbol)
+        if (!checkStartingSymbol)
             return false;
 
-        for(Set<String> lhs : P.keySet()){
-            if(lhs.size()>1)
+        for (Set<String> lhs : P.keySet()) {
+            if (lhs.size() > 1)
                 return false;
-            else if(!N.contains(lhs.iterator().next()))
+            else if (!N.contains(lhs.iterator().next()))
                 return false;
 
             Set<List<String>> rhs = P.get(lhs);
 
-            for(List<String> rh : rhs) {
+            for (List<String> rh : rhs) {
                 for (String r : rh) {
-                    if(!(N.contains(r) || E.contains(r) || r.equals("epsilon")))
+                    if (!(N.contains(r) || E.contains(r) || r.equals("epsilon")))
                         return false;
                 }
             }

@@ -17,39 +17,37 @@ public class Main {
                 sequence.addAll(symbols);
                 line = reader.readLine();
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return sequence;
     }
 
-    public static List<String> readPIF(String filename){
+    public static List<String> readPIF(String filename) {
         try {
             List<String> tokens = new ArrayList<>();
             BufferedReader reader = new BufferedReader(new FileReader(filename));
             String line = reader.readLine();
-            while (line != null){
+            while (line != null) {
                 List<String> tokenAndPosition = Arrays.asList(line.split(" "));
-                if(!tokenAndPosition.get(3).equals("-1")) {
-                    if(tokenAndPosition.get(0).contains("\"") || tokenAndPosition.get(0).contains("'") || !Pattern.matches("[a-zA-Z]+",tokenAndPosition.get(0)))
+                if (!tokenAndPosition.get(3).equals("-1")) {
+                    if (tokenAndPosition.get(0).contains("\"") || tokenAndPosition.get(0).contains("'") || !Pattern.matches("[a-zA-Z]+", tokenAndPosition.get(0)))
                         tokens.add("constant");
                     else
                         tokens.add("identifier");
-                }
-                else
+                } else
                     tokens.add(tokenAndPosition.get(0).strip());
                 line = reader.readLine();
             }
             reader.close();
             return tokens;
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             return new ArrayList<>();
         }
     }
 
     public static void main(String[] args) {
-        Grammar grammar = new Grammar("src/Resources/g1.txt");
+        Grammar grammar = new Grammar("src/Resources/g2.txt");
 
 //        System.out.println(grammar.printNonTerminals());
 //        System.out.println(grammar.printTerminals());
@@ -67,13 +65,13 @@ public class Main {
         System.out.println("\nParseTable: ");
         System.out.println(parser.printParseTable());
 //        List<String> sequence = List.of("(","int",")","+","int");
-        List<String> sequence = readText("src/Resources/seq.txt");
+        List<String> sequence = readText("src/Resources/P1err.txt");
 //        List<String> sequence = readPIF("src/ubb/flcd/Resources/PIF.txt");
         System.out.println("Parse sequence: ");
         System.out.println(parser.parseSequence(sequence));
 //        System.out.println(parser.getProductionsRhs());
 
-        ParserOutput parserOutput = new ParserOutput(parser,sequence,"src/Resources/out1.txt");
+        ParserOutput parserOutput = new ParserOutput(parser, sequence, "src/Resources/out2.txt");
         parserOutput.printTree();
     }
 }
